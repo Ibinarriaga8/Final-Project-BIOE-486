@@ -1,8 +1,10 @@
 import os
 import pandas as pd
 from PIL import Image
+import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
+from torchvision.utils import save_image
 
 
 class MURADataset(Dataset):
@@ -65,9 +67,11 @@ def get_mura_loaders(batch_size=16, img_size=256, num_workers=0):
     recon_train_df = train_df[train_df["label"] == 0].copy()
     recon_val_df = valid_df[valid_df["label"] == 0].copy()
 
+    # reconstruction datasets use only normal samples (label=0)
     recon_train_dataset = MURADataset(recon_train_df, transform=train_transform, return_label=False)
     recon_val_dataset = MURADataset(recon_val_df, transform=valid_transform, return_label=False)
 
+    # classification datasets use all samples
     clf_train_dataset = MURADataset(train_df, transform=train_transform, return_label=True)
     clf_val_dataset = MURADataset(valid_df, transform=valid_transform, return_label=True)
 
@@ -105,4 +109,21 @@ def test_mura_loader():
         else:
             print(batch.shape)
 
+def save_sample_images():
+    loaders = get_mura_loaders(batch_size=4, img_size=128, num_workers=0)
+
+    for name, loader in loaders.items():
+        batch = next(iter(loader))
+        images, labels = batch if isinstance(batch, list) or isinstance(batch, tuple) else (batch, None)
+
+        os.makedirs(f"debug_{name}", exist_ok=True)
+
+        for i in range(len(images)):
+            label_str = f"label_{labels[i].item()}" if isinstance(labels, torch.Tensor) else "no_label"
+            path = f"debug_{name}/sample_{i}_{label_str}.png"
+            save_image(images[i], path, normalize=True)
+
+        print(f"Saved images in ./debug_{name}/")
+
 test_mura_loader()
+save_sample_images()
