@@ -6,6 +6,8 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from torchvision.utils import save_image
 
+PIN_MEMORY = torch.cuda.is_available()
+
 
 class MURADataset(Dataset):
     def __init__(self, df, transform=None, return_label=True):
@@ -76,17 +78,17 @@ def get_mura_loaders(batch_size=16, img_size=256, num_workers=0):
     clf_val_dataset = MURADataset(valid_df, transform=valid_transform, return_label=True)
 
     mura_recon_train_loader = DataLoader(
-        recon_train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers
+        recon_train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=PIN_MEMORY
     )
     mura_recon_val_loader = DataLoader(
-        recon_val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers
+        recon_val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=PIN_MEMORY
     )
 
     mura_clf_train_loader = DataLoader(
-        clf_train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers
+        clf_train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=PIN_MEMORY
     )
     mura_clf_val_loader = DataLoader(
-        clf_val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers
+        clf_val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=PIN_MEMORY
     )
 
     return {
@@ -125,5 +127,6 @@ def save_sample_images():
 
         print(f"Saved images in ./debug_{name}/")
 
-test_mura_loader()
-save_sample_images()
+if __name__ == "__main__":
+    test_mura_loader()
+    save_sample_images()

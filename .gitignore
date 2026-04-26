@@ -1,2 +1,57 @@
-GRAZ/
-MURA-v1.1/
+# Datasets
+data/GRAZ/
+data/MURA-v1.1/
+
+# Debug output
+debug_*/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Model checkpoints & outputs
+checkpoints/
+outputs/
+runs/
+logs/
+*.pt
+*.pth
+*.ckpt
+*.h5
+
+# Experiment tracking
+wandb/
+mlruns/
+.neptune/
+
+# IDEs
+.vscode/
+.idea/
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Misc
+*.log
+*.tmp
+.env
