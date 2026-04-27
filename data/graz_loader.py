@@ -13,10 +13,11 @@ PIN_MEMORY = torch.cuda.is_available()
 
 
 class GRAZDataset(Dataset):
-    def __init__(self, df, transform=None, return_label=True):
+    def __init__(self, df, transform=None, return_label=True, img_size=256):
         self.df = df.reset_index(drop=True)
         self.transform = transform
         self.return_label = return_label
+        self.img_size = img_size
 
     def __len__(self):
         return len(self.df)
@@ -24,7 +25,9 @@ class GRAZDataset(Dataset):
     def __getitem__(self, idx):
         row = self.df.iloc[idx]
 
+        # Resize in PIL BEFORE numpy to keep RAM usage low (avoids large intermediate arrays)
         image = Image.open(row["full_path"]).convert("L")
+        image = image.resize((self.img_size, self.img_size), Image.BILINEAR)
         image = np.array(image, dtype=np.float32)
 
         image -= image.min()
@@ -87,8 +90,8 @@ def get_graz_loaders(batch_size=16, img_size=256, num_workers=0, val_split=0.2, 
         transforms.Normalize(mean=[0.5], std=[0.5]),
     ])
 
-    train_dataset = GRAZDataset(train_df, transform=train_transform)
-    val_dataset = GRAZDataset(val_df, transform=val_transform)
+    train_dataset = GRAZDataset(train_df, transform=train_transform, img_size=img_size)
+    val_dataset = GRAZDataset(val_df, transform=val_transform, img_size=img_size)
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=PIN_MEMORY)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=PIN_MEMORY)
@@ -118,8 +121,8 @@ def get_graz_recon_datasets(img_size=256, val_split=0.2, seed=42):
     ])
 
     return (
-        GRAZDataset(train_df, transform=train_transform, return_label=False),
-        GRAZDataset(val_df, transform=val_transform, return_label=False),
+        GRAZDataset(train_df, transform=train_transform, return_label=False, img_size=img_size),
+        GRAZDataset(val_df, transform=val_transform, return_label=False, img_size=img_size),
     )
 
 

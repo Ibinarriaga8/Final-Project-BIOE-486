@@ -29,29 +29,29 @@ class ConvTransposeBlock(nn.Module):
 
 
 class Autoencoder(nn.Module):
-    def __init__(self, latent_dim=512):
+    def __init__(self, latent_dim=512, img_size=224):
         super().__init__()
+        feat_size = img_size // 16  # 4 stride-2 convolutions
+        flat_dim = 256 * feat_size * feat_size
 
-        # encoder: 1x256x256 → latent_dim
         self.encoder = nn.Sequential(
-            ConvBlock(1, 32, stride=2),    # 128x128
-            ConvBlock(32, 64, stride=2),   # 64x64
-            ConvBlock(64, 128, stride=2),  # 32x32
-            ConvBlock(128, 256, stride=2), # 16x16
+            ConvBlock(1, 32, stride=2),
+            ConvBlock(32, 64, stride=2),
+            ConvBlock(64, 128, stride=2),
+            ConvBlock(128, 256, stride=2),
             nn.Flatten(),
-            nn.Linear(256 * 16 * 16, latent_dim),
+            nn.Linear(flat_dim, latent_dim),
             nn.ReLU(inplace=True),
         )
 
-        # decoder: latent_dim → 1x256x256
         self.decoder = nn.Sequential(
-            nn.Linear(latent_dim, 256 * 16 * 16),
+            nn.Linear(latent_dim, flat_dim),
             nn.ReLU(inplace=True),
-            nn.Unflatten(1, (256, 16, 16)),
-            ConvTransposeBlock(256, 128),  # 32x32
-            ConvTransposeBlock(128, 64),   # 64x64
-            ConvTransposeBlock(64, 32),    # 128x128
-            ConvTransposeBlock(32, 1),     # 256x256
+            nn.Unflatten(1, (256, feat_size, feat_size)),
+            ConvTransposeBlock(256, 128),
+            ConvTransposeBlock(128, 64),
+            ConvTransposeBlock(64, 32),
+            ConvTransposeBlock(32, 1),
             nn.Tanh(),
         )
 
@@ -64,8 +64,8 @@ class Autoencoder(nn.Module):
 
 
 if __name__ == "__main__":
-    model = Autoencoder()
-    x = torch.randn(2, 1, 256, 256)
+    model = Autoencoder(img_size=224)
+    x = torch.randn(2, 1, 224, 224)
     out = model(x)
     print("Input:", x.shape, "Output:", out.shape)
     total = sum(p.numel() for p in model.parameters())
