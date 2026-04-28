@@ -17,14 +17,14 @@ from models.classifier import build_classifier
 
 # Config
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-EPOCHS = 30
+EPOCHS = 100
 BATCH_SIZE = 32
 IMG_SIZE = 224
 LR = 1e-4
 NUM_WORKERS = 4
 CHECKPOINT_DIR = "checkpoints"
 OUTPUT_DIR = "outputs/classifier"
-DATASET = "graz"  # "graz" or "mura"
+DATASET = "GRAZ"  # "graz" or "mura"
 
 
 def train_one_epoch(model, loader, criterion, optimizer):

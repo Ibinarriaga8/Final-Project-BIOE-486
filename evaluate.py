@@ -231,6 +231,7 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
+    print("s")
 
     if args.classifier:
         eval_classifier(args.classifier, dataset=args.dataset)

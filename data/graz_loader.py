@@ -49,22 +49,27 @@ def load_graz_metadata(graz_root="data/GRAZ"):
     csv_path = os.path.join(graz_root, "dataset.csv")
     df = pd.read_csv(csv_path)
 
-    part_dirs = sorted(
-        os.path.join(graz_root, d)
-        for d in os.listdir(graz_root)
-        if d.startswith("images_part") and os.path.isdir(os.path.join(graz_root, d))
-    )
+    # Use the single images folder you actually have
+    image_dir = os.path.join(graz_root, "images")
 
     stem_to_path = {}
-    for image_dir in part_dirs:
-        for filename in os.listdir(image_dir):
-            full_path = os.path.join(image_dir, filename)
-            if os.path.isfile(full_path):
-                stem_to_path[Path(filename).stem] = full_path
+    for filename in os.listdir(image_dir):
+        full_path = os.path.join(image_dir, filename)
+        if os.path.isfile(full_path):
+            stem_to_path[Path(filename).stem] = full_path
 
+    # Map filestem to full path
     df["full_path"] = df["filestem"].map(stem_to_path)
+
+    # Keep only rows with valid images
     df = df[df["full_path"].notna()].copy()
+
+    # Create label (0 = normal, 1 = fracture)
     df["label"] = df["fracture_visible"].fillna(0).astype(int)
+
+    # Optional but useful sanity check
+    if len(df) == 0:
+        raise ValueError("No images matched with dataset.csv. Check filenames and paths.")
 
     return df
 

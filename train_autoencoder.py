@@ -19,7 +19,7 @@ from models.autoencoder import Autoencoder
 
 # Config
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-EPOCHS = 50
+EPOCHS = 100
 BATCH_SIZE = 32
 IMG_SIZE = 224
 LR = 1e-3
